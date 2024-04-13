@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Games in your url!</title>
+<script>
+window.addEventListener("load", () => {
+	// make sure all urls to this page point to this page regardless of where the page is
+	let selfUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}`;
+	for (let url of document.getElementsByClassName("self-url")) {
+		url.innerText = selfUrl;
+	}
+	for (let link of document.getElementsByClassName("self-link")) {
+		link.href = selfUrl + link.search + link.hash;
+	}
+
+	// some options that are not part of the code itself
+	let params = new URLSearchParams(window.location.search);
+	let encoding = params.get("e");
+
+	// the fragment part of the url is not url decoded, allowing for some more characters
+	let code = params.get("c") || window.location.hash.substring(1);
+	if (!code) {
+		return;
+	}
+
+	if (encoding === "" || encoding === "b" || encoding === "b64") {
+		code = atob(code);
+	}
+
+	// clear body
+	while (document.body.firstChild) {
+		document.body.removeChild(document.body.firstChild);
+	}
+	let shim = params.get("s");
+	if (!shim && (params.get("w") || params.get("h"))) {
+		shim = "c";
+	}
+	if (shim === "c") {
+		let canvas = document.createElement("canvas");
+		canvas.width = params.get("w") || window.innerWidth;
+		canvas.height = params.get("h") || window.innerHeight;
+		canvas.className = "canvas";
+		document.body.appendChild(canvas);
+		window.a = canvas;
+		window.c = canvas.getContext("2d");
+	}
+
+	let description = (params.get("d") || "").replace(/_/g, " ");
+	if (description) {
+		let descriptionElement = document.createElement("p");
+		descriptionElement.innerText = description;
+		descriptionElement.className = "description";
+		document.body.appendChild(descriptionElement);
+	}
+
+
+	window.b = document.body;
+
+	window.M = Math;
+	window.I = window.setInterval;
+	window.F = window.requestAnimationFrame;
+
+	console.log("code:");
+	console.log(code);
+	if (shim === "b") {
+		document.body.innerHTML = code;
+	} else if (shim === "o") {
+		document.body.outerHTML = code;
+		document.body.onload(null)
+	} else {
+		eval(code);
+
+	}
+});
+window.addEventListener("hashchange", () => {
+	window.location.reload();
+});
+</script>
+<style>
+body {
+	text-align: center;
+}
+.description {
+	position: absolute;
+	right: 5px;
+	bottom: 5px;
+}
+.code-text {
+	background-color: #eee;
+	border: 1px solid #aaa;
+	font-family: monospace;
+	padding: 0px 3px;
+}
+.explanation {
+	text-align: left;
+}
+</style>
+</head>
+<body>
+	<div class="explanation">
+		<h1>Play games from your url<h1>
+		<h2>Structure</h2>
+		<p>The source code can either be in the <span class="code-text">c</span> query parameter or in the fragment part of the url.</p>
+		<p>The following query parameters are relevant:</p>
+		<ul>
+			<li><strong>e</strong>: The encoding used for the sourcecode. Setting this to the empty or to <span class="code-text">b64</span> will interpret the source code as base46. Omitting this will not decode anything</li>
+			<li><strong>s</strong>: The context for executing the code:
+				<ul>
+					<li>empty: run the code as JS</li>
+					<li><span class="code-text">c</span>: Create a canvas and run the code as JS</li>
+					<li><span class="code-text">b</span>: Replace the html inside the document body with the code</li>
+				</ul>
+			</li>
+			<li><strong>d</strong>: The description. This will be shown in the bottom of the page. Underscores in the description will be replaced with spaces.</li>
+			<li><strong>w</strong>: The width and height of the canvas. Implies <span class="code-text">s=c</span>. Default is <span class="code-text">window.innerWidth</span></li>
+			<li><strong>h</strong>: The width and height of the canvas. Implies <span class="code-text">s=c</span>. Default is <span class="code-text">window.innerHeight</span></li>
+		</ul>
+		<p>The following shorthands are available in the javascript code (set on the global <span class="code-text">window</span> object):</p>
+		<ul>
+			<li><span class="code-text">b</span>: <span class="code-text">document.body</span></li>
+			<li><span class="code-text">a</span>: The canvas (if it exists);</li>
+			<li><span class="code-text">c</span>: The RenderingContext2D of the canvas (if it exists);</li>
+		</ul>
+		<h2>Examples</h2>
+		<ul>
+			<li>
+				<a class="self-link" href="index.html?w=400&d=Hello_Canvas#c.fillText('HelloWorld',10,10)">
+					<span class="self-url">troido.nl/u/</span>
+					?w=400&d=Hello_Canvas#c.fillText('HelloWorld',10,10)
+				</a>
+			</li>
+			<li>
+				<a class="self-link" href="index.html?s=b&e=&d=Hello_HTML#PGgxPkhlbGxvIFdvcmxkPC9oMT4K">
+					<span class="self-url">troido.nl/u/</span>
+					?s=b&e=&d=Hello_HTML#PGgxPkhlbGxvIFdvcmxkPC9oMT4K
+				</a>
+			</li>
+			<li>
+				<a class="self-link" href="index.html?s=o&e=&d=Minisweeper_by_Troido#PGJvZHkgb25sb2FkPSdtPTI1Njtmb3IoaT0yNzI7aS0tO2MuaW5uZXJIVE1MKz1pJTE3P2A8YSBvbmNsaWNrPXRoaXMub3V0ZXJIVE1MPWNbaj0ke20tPWNbaV09TWF0aC5yYW5kb20oYT1hbGVydCk8LjIsaX1dP2EoIkJPT00iKXx8IlgiOjgtZigxLC0tbXx8YSgiPUQiKSktZigxNiktZigxNyktZigxOCk+IzwvYT4gYDpgXG5gKWY9eD0+IWNbait4XSshY1tqLXhdJz48cHJlIGlkPWM+Cg==">
+					<span class="self-url">troido.nl/u/</span>
+					?s=o&e=&d=Minisweeper_by_Troido#PGJvZHkgb25sb2FkPSdtPTI1Njtmb3IoaT0yNzI7aS0tO2MuaW5uZXJIVE1MKz1pJTE3P2A8YSBvbmNsaWNrPXRoaXMub3V0ZXJIVE1MPWNbaj0ke20tPWNbaV09TWF0aC5yYW5kb20oYT1hbGVydCk8LjIsaX1dP2EoIkJPT00iKXx8IlgiOjgtZigxLC0tbXx8YSgiPUQiKSktZigxNiktZigxNyktZigxOCk+IzwvYT4gYDpgXG5gKWY9eD0+IWNbait4XSshY1tqLXhdJz48cHJlIGlkPWM+Cg==
+				</a>
+			</li>
+			<li>
+				<a class="self-link" href="index.html?d=Magic_Powder_by_Troido_and_Qqwy&w=800&h=450&e=#Zm9yKF89JzAwfmZma34waiJiYTg3YTc3NzdkZjA3MzNmMzBrNzQ0NDA3ZmR+YWFhajdrNzN+OTA5NzUwN345MGYwZjBrazBhMGthNzEwNSJXK1dbQV1WbmV3IFQ9VFVpbnRTQXJyYXlSUzMyUihRMHhQLFBPTzM5Tl18PUw9NDstNDxLYiZKSlBIcltHdVtGODMkKGI+PiMmJiEhMTI4PDwjHy5maWxsKFAeY34xah0zNkU0HDgwG2JPGhswGSsZKhhjMU8XZT1kFj10Lm9rc2V0FSk7FDE2EyYxNSkrOF1eQhJJbWFnZURhdGEoESEoEC0tOykPPXQ9Pg4pLAxvbm1vdXNlCyYxOTIpPChKMTkyKXx8CWZvcigIR2VdB01hdGgucmFuZG9tKCkGFitbMSwtMSwZLC0ZXVs0KgZ8MF0FFisoKAYtLjUpKigxKyhKNikpfDApBBBiPUYjMTkSDAMsbT1IN2owHxMmNwwCByZtAwcmbBAHPUYjMjYSKQFmPWc9aD1CPXA9MDtyURwUch4dFHU9W1AzZThiYxozNCRjGjEwF2M5OWMwOGZPNDckNGZPNRM4NDhkTjE4YzA2ZE5mMyQ5GjdmYjE4Zk81MWU4NDc3LDQ3M08dTzEzMDM4MRczN2NkJBcTORsxZjNPOWRiLDU5OU80MDM2JBcxM2QZYjNPNmphGjVqYRozNGQzODFjGjY4OBtlZk5mMxs1N107dj17fTsIQSBpblcpdltGQS8zfDBdTCgiUCJWVnwwKTw8QSUzKjg7bj1UUkJ1a2VyKDE0NEU0FENRbhR3UzhDbGFtcGVkUihuFGEuC2Rvd24OZj0xOwt1cA5mPTA7YS4LbW92ZQ57ZxVYO2gVWX07b253aGVlbA5wKz0wPHQuZGVsdGFZfHwxMTtzZXRJbnRlcnZhbCh0PT57Qx5ramoUCHlLeQ8IeEt4DwhmEEdnGGgreBh5XT1GcCUxMl1eQgxBPTEyO0EPQ1sTKxMqQSt4GHkrUGMbKihBPT1wJTEyKStQYxtMdltGQV1dO0JePTE7CGQ9HDtkD2I9R2RdLGJeUB0QMSZiKT09QhBsPUgzGWofMjMmNykCQ1tkTHZbYnwxXSxKMzIhLjE+BgNIGTAQSDRqajA/Fi0ZOigFLAECBQwBDAQYKChKOCExKS0oShMhLjU8BikMHD5lITA8ZRAHCUo0EEcEXQkoFgxIGTB8fCgBDEdkXT0HLAc9Yl4xFGMucHV0EVQRdywZLDQ1MAwwLDApfSwTKSc7Rz0vW14gIiUtRUlNVVgtaWwtfV0vLmV4ZWMoXyk7KXdpdGgoXy5zcGxpdChHKSlfPWpvaW4oc2hpZnQoKSk7ZXZhbChfKQ==">
+					<span class="self-url">troido.nl/u/</span>
+					?d=Magic_Powder_by_Troido_and_Qqwy&w=800&h=450&e=#Zm9yKF89JzAwfmZma34waiJiYTg3YTc3NzdkZjA3MzNmMzBrNzQ0NDA3ZmR+YWFhajdrNzN+OTA5NzUwN345MGYwZjBrazBhMGthNzEwNSJXK1dbQV1WbmV3IFQ9VFVpbnRTQXJyYXlSUzMyUihRMHhQLFBPTzM5Tl18PUw9NDstNDxLYiZKSlBIcltHdVtGODMkKGI+PiMmJiEhMTI4PDwjHy5maWxsKFAeY34xah0zNkU0HDgwG2JPGhswGSsZKhhjMU8XZT1kFj10Lm9rc2V0FSk7FDE2EyYxNSkrOF1eQhJJbWFnZURhdGEoESEoEC0tOykPPXQ9Pg4pLAxvbm1vdXNlCyYxOTIpPChKMTkyKXx8CWZvcigIR2VdB01hdGgucmFuZG9tKCkGFitbMSwtMSwZLC0ZXVs0KgZ8MF0FFisoKAYtLjUpKigxKyhKNikpfDApBBBiPUYjMTkSDAMsbT1IN2owHxMmNwwCByZtAwcmbBAHPUYjMjYSKQFmPWc9aD1CPXA9MDtyURwUch4dFHU9W1AzZThiYxozNCRjGjEwF2M5OWMwOGZPNDckNGZPNRM4NDhkTjE4YzA2ZE5mMyQ5GjdmYjE4Zk81MWU4NDc3LDQ3M08dTzEzMDM4MRczN2NkJBcTORsxZjNPOWRiLDU5OU80MDM2JBcxM2QZYjNPNmphGjVqYRozNGQzODFjGjY4OBtlZk5mMxs1N107dj17fTsIQSBpblcpdltGQS8zfDBdTCgiUCJWVnwwKTw8QSUzKjg7bj1UUkJ1a2VyKDE0NEU0FENRbhR3UzhDbGFtcGVkUihuFGEuC2Rvd24OZj0xOwt1cA5mPTA7YS4LbW92ZQ57ZxVYO2gVWX07b253aGVlbA5wKz0wPHQuZGVsdGFZfHwxMTtzZXRJbnRlcnZhbCh0PT57Qx5ramoUCHlLeQ8IeEt4DwhmEEdnGGgreBh5XT1GcCUxMl1eQgxBPTEyO0EPQ1sTKxMqQSt4GHkrUGMbKihBPT1wJTEyKStQYxtMdltGQV1dO0JePTE7CGQ9HDtkD2I9R2RdLGJeUB0QMSZiKT09QhBsPUgzGWofMjMmNykCQ1tkTHZbYnwxXSxKMzIhLjE+BgNIGTAQSDRqajA/Fi0ZOigFLAECBQwBDAQYKChKOCExKS0oShMhLjU8BikMHD5lITA8ZRAHCUo0EEcEXQkoFgxIGTB8fCgBDEdkXT0HLAc9Yl4xFGMucHV0EVQRdywZLDQ1MAwwLDApfSwTKSc7Rz0vW14gIiUtRUlNVVgtaWwtfV0vLmV4ZWMoXyk7KXdpdGgoXy5zcGxpdChHKSlfPWpvaW4oc2hpZnQoKSk7ZXZhbChfKQ==
+				</a>
+			</li>
+			<li>
+				<a class="self-link" href="index.html?d=Minimal_Miner_by_Troido&w=768&h=768&e=#Zm9yKF89Jz0wfjE2YGcoYl81MF4pLFpaX1lZLV5YW2JdV3BXW1ZWMl1VKyspUS0xWSteUFJlY3QoT2NsZWFyTk1hdGguTGtXSys9Sik7SGtbYj0oRUctMSkvOCxGO29ua2V5RHwwKUNDK14qKEJCckErMUB8fB8mJh5uWx0sYBw0HCobYy5maWxsGhpPYCoZIiwZZBhhLmhlaWdodBcrLjUWSW50ZXJ2YWwoFWZvcigUGBwqZRwcKRNMcmFuZG9tKCkSEi1lLzhFMzwuMBFWMV0QVjBdDzAsDj1bXSwMZnVuY3Rpb24oYil7Cz0LHWIud2hpY2hdPQkeKAg0LDgsOCkHKy45OTkGO2Muc2V0VHJhbnNmb3JtKDEsDg4xLAV1CC0tSx8odkpsVyxtVz0OXylaGQRDXR9HAxpTdHlsZT0iIwI7aWYoRxZBAxZBBgNBAwZBA0EGAwZBBkNdKQFrDGwMbQxuDHAMRT01LHI9Mw50PXU9dn5EZG93bgkxfUR1cAkwfTsUYn47MkU0PmI7YlFpZihkPWIlNQ5lPWIvXnwOZT4zKkxzaW4oZC81KSszMh4SPC45OAhLPTMyLGxXPRE0LBExCEs9DnAucHVzaChbZBYsZSwwXSkpWjA9PWQfNDk9PWQfMD09ZR8zOTk9PWUpSz0xLzA7Zz0LZD1tVzttVz0xO2QfSx8oX0BZUFhZK15AWFAtMVhAKSl9O2coKEVBQ0hoPXNldBULYy5OTw4OYS53aWR0aCwXKQUtYBwqLXIrFy8yQzsUYiBpbiBwKWQ9DyxlPRAsMjxlCA9KKFUlMioyRhBKKDIqKFU+PjEpRmtbKA9CEENdCFU9NCoSfA4PPWQsED1lWg8+RR4QPnIeRUA+Dx5yQD4QCGFsZXJ0KCJkZWFkXFxuc2NvcmU6ICIrdlpOFWgpWgJmMDAYLRtlLQdIFGR+O14+ZDtkURRlPXItMjR8MDtlPHIrMjQ7ZVEoYj1kK14qZSxtVyk/SwgCODg4EyxsVwgCY2M0GCsbZSsHKSk6KAIwMDATSAIwMGYiOxlFHCpyHBxIAjIyMiI7dT0dYF07RUooKB02OF1DLSgdNjVdQykvYAEEKEVAQy0bcisHLHV+WkU9RRZ8MDt0Si4wMDMyKiguNT50KS0oIXQmHTg3XR4uMTVIckp0ASgwPHQ/HTgzXTodODddKR4ERSsbKHJAQy0HWnI9chZ8DnR+PnQ/MUUtOTowBQ4wSBpUZXh0KHYsMg4yMCl9LDIwKSc7Zz0vW14gLT9FSU1SLVRbLVxdYS19XS8uZXhlYyhfKTspd2l0aChfLnNwbGl0KGcpKV89am9pbihzaGlmdCgpKTtldmFsKF8p">
+					<span class="self-url">troido.nl/u/</span>
+					?d=Minimal_Miner_by_Troido&w=768&h=768&e=#Zm9yKF89Jz0wfjE2YGcoYl81MF4pLFpaX1lZLV5YW2JdV3BXW1ZWMl1VKyspUS0xWSteUFJlY3QoT2NsZWFyTk1hdGguTGtXSys9Sik7SGtbYj0oRUctMSkvOCxGO29ua2V5RHwwKUNDK14qKEJCckErMUB8fB8mJh5uWx0sYBw0HCobYy5maWxsGhpPYCoZIiwZZBhhLmhlaWdodBcrLjUWSW50ZXJ2YWwoFWZvcigUGBwqZRwcKRNMcmFuZG9tKCkSEi1lLzhFMzwuMBFWMV0QVjBdDzAsDj1bXSwMZnVuY3Rpb24oYil7Cz0LHWIud2hpY2hdPQkeKAg0LDgsOCkHKy45OTkGO2Muc2V0VHJhbnNmb3JtKDEsDg4xLAV1CC0tSx8odkpsVyxtVz0OXylaGQRDXR9HAxpTdHlsZT0iIwI7aWYoRxZBAxZBBgNBAwZBA0EGAwZBBkNdKQFrDGwMbQxuDHAMRT01LHI9Mw50PXU9dn5EZG93bgkxfUR1cAkwfTsUYn47MkU0PmI7YlFpZihkPWIlNQ5lPWIvXnwOZT4zKkxzaW4oZC81KSszMh4SPC45OAhLPTMyLGxXPRE0LBExCEs9DnAucHVzaChbZBYsZSwwXSkpWjA9PWQfNDk9PWQfMD09ZR8zOTk9PWUpSz0xLzA7Zz0LZD1tVzttVz0xO2QfSx8oX0BZUFhZK15AWFAtMVhAKSl9O2coKEVBQ0hoPXNldBULYy5OTw4OYS53aWR0aCwXKQUtYBwqLXIrFy8yQzsUYiBpbiBwKWQ9DyxlPRAsMjxlCA9KKFUlMioyRhBKKDIqKFU+PjEpRmtbKA9CEENdCFU9NCoSfA4PPWQsED1lWg8+RR4QPnIeRUA+Dx5yQD4QCGFsZXJ0KCJkZWFkXFxuc2NvcmU6ICIrdlpOFWgpWgJmMDAYLRtlLQdIFGR+O14+ZDtkURRlPXItMjR8MDtlPHIrMjQ7ZVEoYj1kK14qZSxtVyk/SwgCODg4EyxsVwgCY2M0GCsbZSsHKSk6KAIwMDATSAIwMGYiOxlFHCpyHBxIAjIyMiI7dT0dYF07RUooKB02OF1DLSgdNjVdQykvYAEEKEVAQy0bcisHLHV+WkU9RRZ8MDt0Si4wMDMyKiguNT50KS0oIXQmHTg3XR4uMTVIckp0ASgwPHQ/HTgzXTodODddKR4ERSsbKHJAQy0HWnI9chZ8DnR+PnQ/MUUtOTowBQ4wSBpUZXh0KHYsMg4yMCl9LDIwKSc7Zz0vW14gLT9FSU1SLVRbLVxdYS19XS8uZXhlYyhfKTspd2l0aChfLnNwbGl0KGcpKV89am9pbihzaGlmdCgpKTtldmFsKF8p
+				</a>
+			</li>
+		</ul>
+	</div>
+</body>
+</html>
