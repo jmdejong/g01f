@@ -48,6 +48,7 @@ window.addEventListener("load", () => {
 
 	let description = (params.get("d") || "").replace(/_/g, " ");
 	if (description) {
+		document.title = description;
 		let descriptionElement = document.createElement("p");
 		descriptionElement.innerText = description;
 		descriptionElement.className = "description";
@@ -104,7 +105,7 @@ body {
 		<p>The source code can either be in the <span class="code-text">c</span> query parameter or in the fragment part of the url.</p>
 		<p>The following query parameters are relevant:</p>
 		<ul>
-			<li><strong>e</strong>: The encoding used for the sourcecode. Setting this to the empty or to <span class="code-text">b64</span> will interpret the source code as base46. Omitting this will not decode anything</li>
+			<li><strong>e</strong>: The encoding used for the sourcecode. Setting this to the empty or to <span class="code-text">b64</span> will interpret the source code as base46. Omitting this will take the characters from the url without any decoding</li>
 			<li><strong>s</strong>: The context for executing the code:
 				<ul>
 					<li>empty: run the code as JS</li>
