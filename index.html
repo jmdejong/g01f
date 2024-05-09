@@ -24,7 +24,9 @@ window.addEventListener("load", () => {
 		return;
 	}
 
-	if (encoding === "" || encoding === "b" || encoding === "b64") {
+	if (encoding === null || encoding === undefined) {
+		code = decodeURI(code);
+	} else if (encoding === "" || encoding === "b" || encoding === "b64") {
 		code = atob(code);
 	}
 
@@ -44,6 +46,8 @@ window.addEventListener("load", () => {
 		document.body.appendChild(canvas);
 		window.a = canvas;
 		window.c = canvas.getContext("2d");
+		window.w = canvas.width;
+		window.h = canvas.height;
 	}
 
 	let description = (params.get("d") || "").replace(/_/g, " ");
@@ -62,8 +66,7 @@ window.addEventListener("load", () => {
 	window.I = window.setInterval;
 	window.F = window.requestAnimationFrame;
 
-	console.log("code:");
-	console.log(code);
+	console.log("code:\n", code);
 	if (shim === "b") {
 		document.body.innerHTML = code;
 	} else if (shim === "o") {
@@ -92,6 +95,7 @@ body {
 }
 canvas {
 	image-rendering: pixelated;
+	border: 2px solid #888
 }
 </style>
 </head>
@@ -101,8 +105,8 @@ canvas {
 		<p>Run games/demos built directly in the url</p>
 		<p>
 			Example:<br />
-			<a href="https://g01f.eu?s=o&e=&d=Minisweeper_by_Troido#PGJvZHkgb25sb2FkPSdtPTI1Njtmb3IoaT0yNzI7aS0tO2MuaW5uZXJIVE1MKz1pJTE3P2A8YSBvbmNsaWNrPXRoaXMub3V0ZXJIVE1MPWNbaj0ke20tPWNbaV09TWF0aC5yYW5kb20oYT1hbGVydCk8LjIsaX1dP2EoIkJPT00iKXx8IlgiOjgtZigxLC0tbXx8YSgiPUQiKSktZigxNiktZigxNyktZigxOCk+IzwvYT4gYDpgXG5gKWY9eD0+IWNbait4XSshY1tqLXhdJz48cHJlIGlkPWM+Cg==">
-				https://g01f.eu?s=o&e=&d=Minisweeper_by_Troido#PGJvZHkgb25sb2FkPSdtPTI1Njtmb3IoaT0yNzI7aS0tO2MuaW5uZXJIVE1MKz1pJTE3P2A8YSBvbmNsaWNrPXRoaXMub3V0ZXJIVE1MPWNbaj0ke20tPWNbaV09TWF0aC5yYW5kb20oYT1hbGVydCk8LjIsaX1dP2EoIkJPT00iKXx8IlgiOjgtZigxLC0tbXx8YSgiPUQiKSktZigxNiktZigxNyktZigxOCk+IzwvYT4gYDpgXG5gKWY9eD0+IWNbait4XSshY1tqLXhdJz48cHJlIGlkPWM+Cg==
+			<a href="https://g01f.eu?w=573&h=400#u=v=2;x=y=300;setInterval('c.fillRect(x,y,3,3);x+=u=x%3C0||x>w-3?-u:u;y+=v=y%3C0||y>h-3?-v:v',10)">
+				https://g01f.eu?w=573&amp;h=400#u=v=2;x=y=300;setInterval('c.fillRect(x,y,3,3);x+=u=x%3C0||x>w-3?-u:u;y+=v=y%3C0||y>h-3?-v:v',10)
 			</a>
 		</p>
 		<p>See <a href="https://github.com/jmdejong/g01f">github.com/jmdejong/g01f</a> for instructions and documentation and more examples</p>
